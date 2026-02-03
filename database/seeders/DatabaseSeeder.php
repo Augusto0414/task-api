@@ -14,17 +14,21 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        $user = User::create([
-            'name' => 'Juan Pérez',
-            'email' => 'juan@example.com',
-            'password' => Hash::make('password123'),
-        ]);
+        $user = User::firstOrCreate(
+            ['email' => 'juan@example.com'],
+            [
+                'name' => 'Juan Pérez',
+                'password' => Hash::make('password123'),
+            ]
+        );
 
-        $user2 = User::create([
-            'name' => 'María García',
-            'email' => 'maria@example.com',
-            'password' => Hash::make('password456'),
-        ]);
+        $user2 = User::firstOrCreate(
+            ['email' => 'maria@example.com'],
+            [
+                'name' => 'María García',
+                'password' => Hash::make('password456'),
+            ]
+        );
 
         Task::create([
             'user_id' => $user->id,
