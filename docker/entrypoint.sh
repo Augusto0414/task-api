@@ -20,13 +20,12 @@ QUEUE_CONNECTION=${QUEUE_CONNECTION:-database}
 CACHE_STORE=${CACHE_STORE:-database}
 EOF
 
-# Configurar git
-git config --global --add safe.directory /var/www/html
-
-# Instalar dependencias
-composer install --no-interaction --prefer-dist
+# Limpiar caches de bootstrap para evitar providers obsoletos
+rm -f /var/www/html/bootstrap/cache/*.php
 
 # Ejecutar migraciones
+php artisan package:discover --ansi
+
 php artisan migrate --force
 
 # Ejecutar seeders
