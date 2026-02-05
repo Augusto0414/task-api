@@ -21,6 +21,22 @@ Para detener y eliminar contenedores:
 docker compose -f docker/docker-compose.yml down
 ```
 
+## Tests
+
+Nota: los tests usan SQLite en memoria. Asegúrate de tener habilitadas las extensiones `pdo_sqlite` y `sqlite3` en tu PHP (php.ini).
+
+Ejecutar tests desde la raíz del proyecto:
+
+```
+php artisan test
+```
+
+Ejecutar tests desde Docker:
+
+```
+docker compose -f docker/docker-compose.yml exec api php artisan test
+```
+
 ## Descripción General
 
 Esta es una API REST implementada en Laravel para gestionar tareas de usuario con autenticación basada en JWT (JSON Web Tokens).
