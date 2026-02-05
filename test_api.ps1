@@ -6,6 +6,44 @@ Write-Host "========================================`n" -ForegroundColor Cyan
 
 $baseUrl = "http://localhost:8000/api/v1"
 $token = $null
+$email = "juan@example.com"
+$password = "password123"
+$jsonHeaders = @{
+    "Content-Type" = "application/json"
+    "Accept" = "application/json"
+}
+
+# 0. Registro (opcional si ya existe)
+Write-Host "0. TESTING REGISTER" -ForegroundColor Yellow
+Write-Host "POST $baseUrl/register" -ForegroundColor Gray
+
+try {
+    $registerBody = @{
+        name = "Juan Pérez"
+        email = $email
+        password = $password
+        password_confirmation = $password
+    } | ConvertTo-Json
+
+    Invoke-RestMethod -Uri "$baseUrl/register" `
+      -Method POST `
+            -Headers $jsonHeaders `
+      -Body $registerBody `
+      -ErrorAction Stop
+
+    Write-Host "Registro exitoso" -ForegroundColor Green
+    Write-Host ""
+} catch {
+    Write-Host "Registro omitido (posible usuario existente)" -ForegroundColor DarkYellow
+    if ($_.Exception.Response) {
+        $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+        $body = $reader.ReadToEnd()
+        if ($body) {
+            Write-Host $body -ForegroundColor DarkYellow
+        }
+    }
+    Write-Host ""
+}
 
 # 1. Login
 Write-Host "1. TESTING LOGIN" -ForegroundColor Yellow
@@ -13,13 +51,13 @@ Write-Host "POST $baseUrl/login" -ForegroundColor Gray
 
 try {
     $loginBody = @{
-        email = "juan@example.com"
-        password = "password123"
+        email = $email
+        password = $password
     } | ConvertTo-Json
 
     $response = Invoke-RestMethod -Uri "$baseUrl/login" `
       -Method POST `
-      -Headers @{"Content-Type"="application/json"} `
+            -Headers $jsonHeaders `
       -Body $loginBody
 
     Write-Host "Login exitoso" -ForegroundColor Green
@@ -30,8 +68,15 @@ try {
     Write-Host ""
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
+    if ($_.Exception.Response) {
+        $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+        $body = $reader.ReadToEnd()
+        if ($body) {
+            Write-Host $body -ForegroundColor Red
+        }
+    }
     Write-Host ""
-    exit    .\test_api.ps1
+    exit 1
 }
 
 # 2. Listar tareas
@@ -41,7 +86,7 @@ Write-Host "GET $baseUrl/tasks" -ForegroundColor Gray
 try {
     $response = Invoke-RestMethod -Uri "$baseUrl/tasks" `
       -Method GET `
-      -Headers @{"Authorization"="Bearer $token"; "Content-Type"="application/json"}
+            -Headers @{"Authorization"="Bearer $token"; "Content-Type"="application/json"; "Accept"="application/json"}
 
     Write-Host "Tareas obtenidas exitosamente" -ForegroundColor Green
     Write-Host "Total de tareas: $($response.data.Count)" -ForegroundColor Green
@@ -69,7 +114,7 @@ try {
 
     $response = Invoke-RestMethod -Uri "$baseUrl/tasks" `
       -Method POST `
-      -Headers @{"Authorization"="Bearer $token"; "Content-Type"="application/json"} `
+            -Headers @{"Authorization"="Bearer $token"; "Content-Type"="application/json"; "Accept"="application/json"} `
       -Body $createBody
 
     Write-Host "Tarea creada exitosamente" -ForegroundColor Green
@@ -90,7 +135,7 @@ Write-Host "GET $baseUrl/tasks/$newTaskId" -ForegroundColor Gray
 try {
     $response = Invoke-RestMethod -Uri "$baseUrl/tasks/$newTaskId" `
       -Method GET `
-      -Headers @{"Authorization"="Bearer $token"; "Content-Type"="application/json"}
+            -Headers @{"Authorization"="Bearer $token"; "Content-Type"="application/json"; "Accept"="application/json"}
 
     Write-Host "Tarea obtenida exitosamente" -ForegroundColor Green
     Write-Host "ID: $($response.task.id)" -ForegroundColor Green
@@ -114,7 +159,7 @@ try {
 
     $response = Invoke-RestMethod -Uri "$baseUrl/tasks/$newTaskId" `
       -Method PUT `
-      -Headers @{"Authorization"="Bearer $token"; "Content-Type"="application/json"} `
+            -Headers @{"Authorization"="Bearer $token"; "Content-Type"="application/json"; "Accept"="application/json"} `
       -Body $updateBody
 
     Write-Host "Tarea actualizada exitosamente" -ForegroundColor Green
@@ -132,7 +177,7 @@ Write-Host "GET $baseUrl/tasks?status=pending" -ForegroundColor Gray
 try {
     $response = Invoke-RestMethod -Uri "$baseUrl/tasks?status=pending" `
       -Method GET `
-      -Headers @{"Authorization"="Bearer $token"; "Content-Type"="application/json"}
+            -Headers @{"Authorization"="Bearer $token"; "Content-Type"="application/json"; "Accept"="application/json"}
 
     Write-Host "Tareas filtradas exitosamente" -ForegroundColor Green
     Write-Host "Tareas con status 'pending': $($response.data.Count)" -ForegroundColor Green
@@ -149,7 +194,7 @@ Write-Host "DELETE $baseUrl/tasks/$newTaskId" -ForegroundColor Gray
 try {
     $response = Invoke-RestMethod -Uri "$baseUrl/tasks/$newTaskId" `
       -Method DELETE `
-      -Headers @{"Authorization"="Bearer $token"; "Content-Type"="application/json"}
+            -Headers @{"Authorization"="Bearer $token"; "Content-Type"="application/json"; "Accept"="application/json"}
 
     Write-Host "Tarea eliminada exitosamente" -ForegroundColor Green
     Write-Host "Mensaje: $($response.message)" -ForegroundColor Green
