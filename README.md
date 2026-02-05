@@ -1,5 +1,26 @@
 # API de Tareas - Documentación
 
+## Levantar la API con Docker Compose
+
+Desde la raíz del proyecto:
+
+1. Construir y levantar contenedores:
+
+```
+docker compose -f docker/docker-compose.yml up -d --build
+```
+
+2. Verificar que esté en línea:
+
+- API: http://localhost:8000
+- Postgres: localhost:5434 (usuario: appuser, password: apppass, db: coredb)
+
+Para detener y eliminar contenedores:
+
+```
+docker compose -f docker/docker-compose.yml down
+```
+
 ## Descripción General
 
 Esta es una API REST implementada en Laravel para gestionar tareas de usuario con autenticación basada en JWT (JSON Web Tokens).
