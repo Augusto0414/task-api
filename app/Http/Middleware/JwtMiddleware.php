@@ -25,12 +25,21 @@ class JwtMiddleware
             ], 401);
         }
 
-        $user = $this->authService->validateToken($token);
+        $payload = $this->authService->validateToken($token);
+
+        if (!$payload) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token inválido o expirado',
+            ], 401);
+        }
+
+        $user = $this->authService->getUserFromToken($token);
 
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Token inválido o expirado',
+                'message' => 'Usuario no encontrado',
             ], 401);
         }
 
